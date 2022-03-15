@@ -9,6 +9,7 @@ import "./Shop.css";
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useCart(products);
+  const [pageCount, setPageCount] = useState(0);
   // products to be rendered on the UI
   const [displayProducts, setDisplayProducts] = useState([]);
 
@@ -16,6 +17,9 @@ const Shop = () => {
     fetch("http://localhost:5000/products")
       .then((res) => res.json())
       .then((data) => {
+        const count = data.count;
+        const pageSize = Math.ceil(count / 10);
+        setPageCount(pageSize);
         setProducts(data.result);
         setDisplayProducts(data.result);
       });
@@ -65,6 +69,12 @@ const Shop = () => {
               handleAddToCart={handleAddToCart}
             ></Product>
           ))}
+          {/* pagination */}
+          <div className="pagination">
+            {[...Array(pageCount).keys()].map((numbers) => (
+              <button>{numbers}</button>
+            ))}
+          </div>
         </div>
         <div className="cart-container">
           <Cart cart={cart}>
