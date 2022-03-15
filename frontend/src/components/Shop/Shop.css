@@ -23,3 +23,8 @@
   margin: 5px;
   cursor: pointer;
 }
+.pagination .selected {
+  background-color: #0514f0;
+  color: #000;
+  font-weight: bold;
+}
