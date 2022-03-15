@@ -19,10 +19,22 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 client.connect((err) => {
-  const collection = client.db("test").collection("devices");
+  const collection = client.db("online_shop").collection("products");
+
+  //get products api
+  app.get("/products", (req, res) => {
+    collection.find().toArray((err, result) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send(result);
+      }
+    });
+  });
+
   // perform actions on the collection object
   err ? console.log(err) : console.log("Connected to Database");
-//   client.close();
+  //   client.close();
 });
 
 app.get("/", (req, res) => res.send("Hello World!"));
