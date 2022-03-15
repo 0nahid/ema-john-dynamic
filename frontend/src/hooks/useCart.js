@@ -6,7 +6,7 @@ const useCart = products => {
 
     useEffect(() => {
 
-        if (products.length) {
+        if (products?.length) {
             const savedCart = getStoredCart();
             const storedCart = [];
             for (const key in savedCart) {
