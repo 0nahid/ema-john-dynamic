@@ -24,12 +24,8 @@ client.connect((err) => {
 
   //get products api
   app.get("/products", (req, res) => {
-    collection.find().toArray((err, result) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send(result);
-      }
+    collection.find({}).toArray((err, result) => {
+      err ? res.send(err) : res.send({ count: result.length, result });
     });
   });
 
