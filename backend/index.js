@@ -31,13 +31,8 @@ client.connect((err) => {
 
   //   get specific products
   app.get("/products/:id", (req, res) => {
-    const id = req.params.id;
-    collection.findOne({ _id: new ObjectId(id) }, (err, result) => {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(result);
-      }
+    collection.findOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
+      err ? res.status(500).send(err) : res.send(result);
     });
   });
 
