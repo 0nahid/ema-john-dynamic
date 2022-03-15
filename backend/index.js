@@ -11,7 +11,8 @@ app.use(cors());
 
 // connect database
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@products.6aa06.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -26,6 +27,18 @@ client.connect((err) => {
     collection.find().toArray((err, result) => {
       if (err) {
         res.send(err);
+      } else {
+        res.send(result);
+      }
+    });
+  });
+
+  //   get specific products
+  app.get("/products/:id", (req, res) => {
+    const id = req.params.id;
+    collection.findOne({ _id: new ObjectId(id) }, (err, result) => {
+      if (err) {
+        res.status(500).send(err);
       } else {
         res.send(result);
       }
