@@ -13,18 +13,19 @@ const Shop = () => {
   const [page, setPage] = useState(0);
   // products to be rendered on the UI
   const [displayProducts, setDisplayProducts] = useState([]);
-
+  const size = 10;
   useEffect(() => {
-    fetch("http://localhost:5000/products")
+    fetch(`http://localhost:5000/products?page=${page}&&size=${size}`)
       .then((res) => res.json())
       .then((data) => {
         const count = data.count;
-        const pageSize = Math.ceil(count / 10);
+        const pageSize = Math.ceil(count / size);
+        console.log(data);
         setPageCount(pageSize);
-        setProducts(data.result);
-        setDisplayProducts(data.result);
+        setProducts(data.products);
+        setDisplayProducts(data.products);
       });
-  }, []);
+  }, [page]);
 
   const handleAddToCart = (product) => {
     const exists = cart.find((pd) => pd.key === product.key);
