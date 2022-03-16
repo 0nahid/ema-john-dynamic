@@ -18,41 +18,36 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-async function run() {
-  try {
-    await client.connect();
-    const database = client.db("online_shop");
-    const productCollection = database.collection("products");
-    const orderCollection = database.collection("orders");
+client.connect((err) => {
+  const collection = client.db("online_shop").collection("products");
 
-    //GET Products API
-    app.get("/products", async (req, res) => {
-      const cursor = productCollection.find({});
-      const page = req.query.page;
-      const size = parseInt(req.query.size);
-      let products;
-      const count = await cursor.count();
+  //get products api
+  app.get("/products", (req, res) => {
+    collection.find({}).toArray((err, result) => {
+      const { page, size } = req.query;
+      console.log(req.query);
+      // pagination
+      page
+        ? collection
+            .find({})
+            .skip(parseInt(size) * page)
+            .limit(parseInt(size))
+            .toArray()
+        : collection.find({}).toArray();
 
-      if (page) {
-        products = await cursor
-          .skip(page * size)
-          .limit(size)
-          .toArray();
-      } else {
-        products = await cursor.toArray();
-      }
-
-      res.send({
-        count,
-        products,
-      });
+      err ? res.send(err) : res.send({ count: result.length, result });
     });
-  } finally {
-    // await client.close();
-  }
-}
+  });
+  //   get specific products
+  app.get("/products/:id", (req, res) => {
+    collection.findOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
+      err ? res.status(500).send(err) : res.send(result);
+    });
+  });
 
-run().catch(console.dir);
-
+  // perform actions on the collection object
+  err ? console.log(err) : console.log("Connected to Database");
+  //   client.close();
+});
 app.get("/", (req, res) => res.send("Hello World!"));
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

@@ -15,15 +15,15 @@ const Shop = () => {
   const [displayProducts, setDisplayProducts] = useState([]);
   const size = 10;
   useEffect(() => {
-    fetch(`http://localhost:5000/products?page=${page}&&size=${size}`)
+    fetch(`http://localhost:5000/products?page=${page}&size=${size}`)
       .then((res) => res.json())
       .then((data) => {
         const count = data.count;
         const pageSize = Math.ceil(count / size);
         console.log(data);
         setPageCount(pageSize);
-        setProducts(data.products);
-        setDisplayProducts(data.products);
+        setProducts(data.result);
+        setDisplayProducts(data.result);
       });
   }, [page]);
 
