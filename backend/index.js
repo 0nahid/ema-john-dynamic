@@ -29,7 +29,7 @@ app.get("/products", (req, res) => {
       const page = Number(req.params.toString());
       const size = Number(req.params.size.toString());
       query.limit(page * size);
-      query.skip(page < 1 ? 0 * size : page - 1 * size);
+      query.skip(page < 2 ? 0 * size : page - 1 * size);
     }
     const products = await query.exec();
     res.status(200).json({ message: "success", products });
