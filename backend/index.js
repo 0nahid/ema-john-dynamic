@@ -1,53 +1,61 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const port = process.env.PORT || 5000;
+const mongoose = require("mongoose");
+const { productsModel } = require("./model");
 
-require("dotenv").config();
+const port = process.env.PORT || 5000;
+const mongoDbUri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@products.6aa06.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+
 // middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// connect database
-
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@products.6aa06.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
+async function connectMongo() {
+  try {
+    await mongoose.connect(mongoDbUri);
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+}
+//get all products
+app.get("/products", (req, res) => {
+  try {
+    const query = productsModel.find();
+    if (req.params.page && req.params.size) {
+      const page = Number(req.params.toString());
+      const size = Number(req.params.size.toString());
+      query.limit(page * size);
+      query.skip(page < 1 ? 0 * size : page - 1 * size);
+    }
+    const products = await query.exec();
+    res.status(200).json({ message: "success", products });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
-client.connect((err) => {
-  const collection = client.db("online_shop").collection("products");
 
-  //get products api
-  app.get("/products", (req, res) => {
-    collection.find({}).toArray((err, result) => {
-      const { page, size } = req.query;
-      console.log(req.query);
-      // pagination
-      page
-        ? collection
-            .find({})
-            .skip(parseInt(size) * page)
-            .limit(parseInt(size))
-            .toArray()
-        : collection.find({}).toArray();
-
-      err ? res.send(err) : res.send({ count: result.length, result });
-    });
-  });
-  //   get specific products
-  app.get("/products/:id", (req, res) => {
-    collection.findOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
-      err ? res.status(500).send(err) : res.send(result);
-    });
-  });
-
-  // perform actions on the collection object
-  err ? console.log(err) : console.log("Connected to Database");
-  //   client.close();
+//   get specific products
+app.get("/products/:id", (req, res) => {
+  try {
+    const product = await productsModel.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.status(200).json({ message: "success", product });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
-app.get("/", (req, res) => res.send("Hello World!"));
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+app.get("/", (_req, res) =>
+  res.status(200).json({
+    message: "Hello World!",
+  })
+);
+
+app.listen(port, () => {
+  connectMongo();
+  console.log(`Example app listening on port ${port}!`); // do not return inside listen
+});
