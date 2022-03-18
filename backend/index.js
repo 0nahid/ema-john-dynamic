@@ -16,6 +16,7 @@ app.use(cors());
 async function connectMongo() {
   try {
     await mongoose.connect(mongoDbUri);
+    console.log("Connected to MongoDB");
   } catch (err) {
     console.log(err);
     process.exit(1);
@@ -25,14 +26,18 @@ async function connectMongo() {
 app.get("/products", async (req, res) => {
   try {
     const query = productsModel.find();
-    if (req.params.page && req.params.size) {
-      const page = Number(req.params.toString());
-      const size = Number(req.params.size.toString());
-      query.limit(page * size);
-      query.skip(page < 2 ? 0 * size : page - 1 * size);
+    if (req.query.page && req.query.size) {
+      const page = Number(req.query.page.toString());
+      const size = Number(req.query.size.toString());
+      query.skip(page < 2 ? 0 * size : (page - 1) * size);
+      query.limit(size);
     }
     const products = await query.exec();
-    res.status(200).json({ message: "success", products });
+    res.status(200).json({
+      message: "success",
+      data_count: products.length,
+      products,
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
