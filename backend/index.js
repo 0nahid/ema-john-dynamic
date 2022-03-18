@@ -39,7 +39,7 @@ app.get("/products", async (req, res) => {
 });
 
 //   get specific products
-app.get("/products/:id", (req, res) => {
+app.get("/products/:id", async (req, res) => {
   try {
     const product = await productsModel.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
