@@ -22,7 +22,7 @@ async function connectMongo() {
   }
 }
 //get all products
-app.get("/products", (req, res) => {
+app.get("/products", async (req, res) => {
   try {
     const query = productsModel.find();
     if (req.params.page && req.params.size) {
